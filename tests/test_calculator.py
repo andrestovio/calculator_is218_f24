@@ -53,3 +53,4 @@ def test_divide(calculator, a, b, expected):
 def test_divide_by_zero(calculator):
     '''test if the divide by zero error is properly displayed'''
     assert calculator.divide(10, 0) == "Error: Division by zero!"
+    
