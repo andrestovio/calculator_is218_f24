@@ -1,24 +1,70 @@
-#main.py
+# calculator.py
 
-from app.calculator import Calculator
+from abc import ABC, abstractmethod
 
-class Calculator:
-    def add(self, a, b):
+# Strategy Interface (Abstract class for mathematical operations)
+class OperationStrategy(ABC):
+    @abstractmethod
+    def execute(self, a, b):
+        pass
+
+# Concrete Strategy for Addition
+class AddStrategy(OperationStrategy):
+    def execute(self, a, b):
         return a + b
 
-    def subtract(self, a, b):
+# Concrete Strategy for Subtraction
+class SubtractStrategy(OperationStrategy):
+    def execute(self, a, b):
         return a - b
 
-    def multiply(self, a, b):
+# Concrete Strategy for Multiplication
+class MultiplyStrategy(OperationStrategy):
+    def execute(self, a, b):
         return a * b
 
-    def divide(self, a, b):
+# Concrete Strategy for Division
+class DivideStrategy(OperationStrategy):
+    def execute(self, a, b):
         try:
             return a / b
         except ZeroDivisionError:
             return "Error: Division by zero!"
 
+# Factory to create the correct strategy based on command
+class OperationFactory:
+    @staticmethod
+    def get_strategy(command):
+        if command == 'add':
+            return AddStrategy()
+        elif command == 'sub':
+            return SubtractStrategy()
+        elif command == 'mul':
+            return MultiplyStrategy()
+        elif command == 'div':
+            return DivideStrategy()
+        else:
+            return None
+
+# Calculator class responsible for executing strategies
+class Calculator:
+    def __init__(self):
+        self.strategy = None
+
+    # Set strategy dynamically based on user input
+    def set_strategy(self, strategy):
+        self.strategy = strategy
+
+    # Execute the current strategy with given numbers
+    def calculate(self, a, b):
+        if self.strategy:
+            return self.strategy.execute(a, b)
+        else:
+            return "Unknown command. Please try again."
+
+# User interface and command parsing logic
 def display_menu():
+    """Displays available commands for the calculator."""
     print("\nSimple Calculator")
     print("Available commands:")
     print("add [a] [b] - Adds two numbers")
@@ -28,6 +74,7 @@ def display_menu():
     print("exit - Exit the calculator")
 
 def parse_input(input_str):
+    """Parses the user's input and returns command and two numbers."""
     tokens = input_str.strip().split()
     if len(tokens) < 3 and tokens[0] != 'exit':
         print("Invalid input. Please enter a valid command.")
@@ -44,9 +91,8 @@ def parse_input(input_str):
     return command, None, None
 
 def repl():
-    # Create an instance of Calculator
+    """Read-Evaluate-Print Loop that runs the calculator."""
     calc = Calculator()
-
     display_menu()
 
     while True:
@@ -57,17 +103,15 @@ def repl():
             print("Exiting calculator. Goodbye!")
             break
 
-        if command == 'add':
-            print(f"Result: {calc.add(a, b)}")
-        elif command == 'sub':
-            print(f"Result: {calc.subtract(a, b)}")
-        elif command == 'mul':
-            print(f"Result: {calc.multiply(a, b)}")
-        elif command == 'div':
-            print(f"Result: {calc.divide(a, b)}")
+        # Get the correct strategy based on user command
+        strategy = OperationFactory.get_strategy(command)
+
+        # If strategy exists, set it and calculate the result
+        if strategy:
+            calc.set_strategy(strategy)
+            print(f"Result: {calc.calculate(a, b)}")
         else:
             print("Unknown command. Please try again.")
 
-if __name__ == "__main":
+if __name__ == '__main__':
     repl()
-    
